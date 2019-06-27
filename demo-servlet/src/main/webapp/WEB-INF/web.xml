@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+
+    <servlet>
+        <servlet-name>SaleHouseServlet</servlet-name>
+        <servlet-class>com.demo.web.servlet.SaleHouseServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SaleHouseServlet</servlet-name>
+        <url-pattern>/saleHouseServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>regionServlet</servlet-name>
+        <servlet-class>com.demo.web.servlet.RegionServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>regionServlet</servlet-name>
+        <url-pattern>/regionServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ExportServlet</servlet-name>
+        <servlet-class>com.demo.web.servlet.ExportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ExportServlet</servlet-name>
+        <url-pattern>/export</url-pattern>
+    </servlet-mapping>
+</web-app>
+        

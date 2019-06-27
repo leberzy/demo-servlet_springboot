@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>房屋列表</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--插件  -->
+    <link rel="stylesheet" href="css/bootstrap.css">
+
+    <!--插件——动画  -->
+    <link rel="stylesheet" href="css/animate.css">
+
+    <!--插件——字体  -->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+
+    <!--插件——时间  -->
+    <link rel="stylesheet" href="css/plugins/bootstrap-datapicker/datepicker3.css">
+
+    <!--插件——表格  -->
+    <link rel="stylesheet" href="css/plugins/bootstrap-table/bootstrap-table.css">
+    <link rel="stylesheet" href="css/plugins/bootstrap-table/bootstrap-table-fixed-columns.css">
+
+    <!--插件——提示消息  -->
+    <link rel="stylesheet" href="css/plugins/toastr/toastr.min.css">
+
+    <!--自定义  -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/page.css" rel="stylesheet">
+
+    <style>
+        .frontTitle {
+            font-size: 28px;
+            font-family: 微软雅黑;
+            color: red;
+        }
+
+        .fontText {
+            font-size: 18px;
+            font-family: 微软雅黑;
+            color: black;
+        }
+
+        .divLeft {
+            float: left;
+            margin-left: 20px;
+        }
+
+        .clear {
+            clear: both
+        }
+    </style>
+</head>
+
+<body class="">
+<ol class="breadcrumb">
+    <li>表格控件</li>
+    <li class="active">房屋列表</li>
+</ol>
+<div class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <form class="form-inline" id="searchForm" method="post">
+                <div class="form-group" style="margin-right: 80px;margin-left: 80px">
+                    <button id="newForm" data-toggle="modal" type="button" class="btn btn-info">
+                        <i class="fa fa-plus-square" aria-hidden="true"></i>新增
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="province" class="control-label">省份：</label>
+                    <select id="provinceSearch" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="city" class="control-label">城市：</label>
+                    <select id="citySearch" name="city_id" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="saleRoom" class="control-label">几室：</label>
+                    <select id="saleRoom" name="sale_room" class="form-control">
+                        <option value="0">--请选择--</option>
+                        <option value="1">1室</option>
+                        <option value="2">2室</option>
+                        <option value="3">3室</option>
+                        <option value="4">4室</option>
+                        <option value="5">5室</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">价格范围：</label>
+                    <div class="input-group" id="price_range">
+                        <input type="text" class="input-sm form-control" name="min_price" value="0"/>
+                        <span class="input-group-addon">到</span>
+                        <input type="text" class="input-sm form-control" name="max_price" value="10000"/>
+                    </div>
+                </div>
+                <button id="searchButton" type="button" class="btn btn-info">查询</button>
+                <button id="exportButton" type="button" class="btn btn-info">导出</button>
+            </form>
+
+            <!--            <div class=" hidden-xs" id="exampleTableEventsToolbar" role="group">-->
+            <!--                <button id="newForm" data-toggle="modal" type="button" class="btn btn-info">-->
+            <!--                    <i class="fa fa-plus-square" aria-hidden="true"></i>新增-->
+            <!--                </button>-->
+            <!--            </div>-->
+            <div class="center-block text-center" style="margin-top: 40px">
+                <ul id="contentList">
+
+                </ul>
+                <div class="page" id="Page">
+                    <!--<ul>
+                        <li class="disabled"><a href="#" data-page="0">首页</a></li>
+                        <li class="disabled"><a href="#" data-page="0">上一页</a></li>
+                        <li class="active"><a href="#page1" data-page="1">1</a></li>
+                        <li><a href="#page2" data-page="2">2</a></li>
+                        <li><a href="#page3" data-page="3">3</a></li>
+                        <li><a href="#page4" data-page="4">4</a></li>
+                        <li><a href="#page5" data-page="5">5</a></li>
+                        <li><a href="#page6" data-page="6">6</a></li>
+                        <li><a href="#" data-page="2">下一页</a></li>
+                        <li><a href="#" data-page="15">末页</a></li>
+                    </ul>-->
+                </div>
+            </div>
+
+
+            <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">新增</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <form class="form-horizontal m-t" id="signupForm" method="post">
+                                <input id="sale_id" name="sale_id" class="form-control" type="hidden"/>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">标题：</label>
+                                    <div class="col-sm-8">
+                                        <input id="sale_subject" name="sale_subject" class="form-control" type="text"/>
+                                        <span class="help-block m-b-none"><i class="fa fa-info-circle"></i> 写一个有吸引力的标题吧</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">省份：</label>
+                                    <div class="col-sm-8">
+                                        <select id="province" name="province" class="form-control"></select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">城市：</label>
+                                    <div class="col-sm-8">
+                                        <select id="city" name="city_id" class="form-control"></select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">小区：</label>
+                                    <div class="col-sm-8">
+                                        <input id="buildName" name="build_name" class="form-control" type="text"
+                                               aria-required="true"
+                                               aria-invalid="true" class="error"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">价格：</label>
+                                    <div class="col-sm-8">
+                                        <input id="sale_total_price" name="sale_total_price" class="form-control"
+                                               type="text"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">面积：</label>
+                                    <div class="col-sm-8">
+                                        <input id="sale_innerarea" name="sale_innerarea" class="form-control"
+                                               type="text"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">房屋状态：</label>
+                                    <div class="col-sm-8">
+                                        <select id="add_status" name="sale_status" style="width: 100px">
+                                            <option value="1">上线</option>
+                                            <option value="2">预售</option>
+                                            <option value="3">在售</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">房屋朝向：</label>
+                                    <div class="col-sm-8">
+                                        <select id="add_direct" name="sale_direct" style="width: 100px">
+                                            <option value="1">东</option>
+                                            <option value="2">南</option>
+                                            <option value="3">西</option>
+                                            <option value="4">北</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">几室：</label>
+                                    <div class="col-sm-8">
+                                        <select id="add_room" name="sale_room" style="width: 100px">
+                                            <option value="1">1室</option>
+                                            <option value="2">2室</option>
+                                            <option value="3">3室</option>
+                                            <option value="4">4室</option>
+                                            <option value="5">5室</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">几厅：</label>
+                                    <div class="col-sm-8">
+                                        <select id="add_hall" name="sale_hall" style="width: 100px">
+                                            <option value="1">1厅</option>
+                                            <option value="2">2厅</option>
+                                            <option value="3">3厅</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">几卫：</label>
+                                    <div class="col-sm-8">
+                                        <select id="add_wei" name="sale_wei" style="width: 100px">
+                                            <option value="1">1卫</option>
+                                            <option value="2">2卫</option>
+                                            <option value="3">3卫</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8 col-sm-offset-3">
+                                        <button id="submit" class="btn btn-primary" type="button">提交</button>
+                                    </div>
+                                </div>
+                            </form>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <button id="closeButton" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--插件  -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<!--插件——表格  -->
+<script src="js/plugins/bootstrap-table/bootstrap-table.js"></script>
+<script src="js/plugins/bootstrap-table/bootstrap-table-zh-CN.js"></script>
+<script src="js/plugins/bootstrap-table/bootstrap-table-fixed-columns.js"></script>
+
+<!--插件——时间  -->
+<script src="js/plugins/bootstrap-datapicker/bootstrap-datepicker.js"></script>
+
+<!--插件——提示消息  -->
+<script src="js/plugins/toastr/toastr.min.js"></script>
+<!--自定义  -->
+<script src="js/loading.js"></script>
+<script src="js/MyPage.js"></script>
+<script>
+
+    var g_pageSize = 5;
+    var g_pageNumber = 1;
+
+    window.operateEvents = {
+        'click .edit': function (e, value, row, index) {
+            alert('You click like action, row: ' + JSON.stringify(row));
+        },
+        'click .remove': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: [row.id]
+            });
+        }
+    };
+    $(function () {
+        $.get("regionServlet?method=getProvinces",
+            function (data) {
+                if (data.code == 0) {
+                    var html = "<option value=''>请选择省份</option>";
+                    for (var i = 0; i < data.data.length; i++) {
+                        html += "<option value='" + data.data[i].province_id + "'>" + data.data[i].province_name + "</option>";
+                    }
+                    $("#provinceSearch").html(html);
+                }
+            });
+
+        $("#provinceSearch").change(function () {
+            const pid = $("#provinceSearch").val();
+            console.log(pid);
+            $.get("regionServlet?method=getCitys&pid=" + pid, function (data) {
+                if (data != null && data.code == 0) {
+                    var html = "<option value=''>请选择城市</option>";
+                    for (var i = 0; i < data.data.length; i++) {
+                        html += "<option value='" + data.data[i].city_id + "'>" + data.data[i].city_name + "</option>";
+                    }
+                    $("#citySearch").html(html);
+                }
+            })
+        });
+
+        $("#searchButton").click(function () {
+            var searchParam = $("#searchForm").serializeJson();
+            searchParam.page_num = g_pageNumber;
+            searchParam.page_size = g_pageSize;
+
+            var d = JSON.stringify(searchParam);
+
+            $.ajax({
+                url: "saleHouseServlet?method=getPageResult",
+                type: "POST",
+                dataType: 'JSON',
+                data: d,
+                contentType: "application/json;charset=utf-8",
+                success: function (response) {
+                    //处理返回的响应结果
+                    console.log(response);
+                    if (response.code == 0) {
+                        var html = '';
+                        var datas = response.data;
+                        for (i in datas) {
+                            var obj = datas[i];
+                            var temp = '';
+                            var direction = direct(datas[i].sale_direct);
+                            var imgSrc = image(i);
+
+                            temp = '<li class=""><div><div class="divLeft" style="margin-left: 200px"><img width="300px" height="210px" src="' + imgSrc + '"></div><div class="divLeft"><div class="title"><strong class="frontTitle">' + obj.sale_subject + '</strong></div><div class="house-info fontText" >' + obj.build_name + '&nbsp;&nbsp;|&nbsp;&nbsp;' + obj.sale_room + '室' + obj.sale_hall + '厅' + obj.sale_wei + '卫 &nbsp;&nbsp;|&nbsp;&nbsp;' + obj.sale_innerarea + '㎡&nbsp;&nbsp;|&nbsp;&nbsp;朝' + direction + '</div><div class="follow-info fontText"></div><div class="price-info fontText"><div class="total-price" style="color: red;font-size: 22px"><span>' + obj.sale_total_price + '</span>万</div></div></div></div></li>' +
+                                '<button type="button" onclick="edit(' + obj.sale_id + ');" class="btn btn-info">编辑</button>&nbsp;&nbsp;&nbsp;<button  type="button" onclick="del(' + obj.sale_id + ')" class="btn btn-info">删除</button><div class="clear"/><hr/>';
+                            html += temp;
+                        }
+                        $("#contentList").html(html);
+                        P.config.total = response.total;
+                        // pageHelper(response.total, response.page_size)
+                        P.initMathod('');
+                    }
+                }
+            });
+        });
+
+        $("#exportButton").click(function () {
+            var searchParam = $("#searchForm").serialize();
+            // var d = JSON.stringify(searchParam);
+            // console.log(searchParam);
+            // $.ajax({
+            //     url: "export",
+            //     type: "get",
+            //     dataType: 'JSON',
+            //     data: d,
+            //     contentType: "application/json;charset=utf-8"
+            // });
+            window.location = "export?" + searchParam;
+        });
+    });
+
+
+    $(function () {
+        Loading.start();
+        setTimeout(function () {
+            Loading.end();
+        }, 2000);
+        //
+        $("#newForm").on('click', function () {
+            resetAll();
+            $("#myModal").modal({
+                backdrop: 'static'
+            });
+        });
+        //消息提示
+        $("#ok").on('click', function () {
+            //常规消息
+            toastr.info("提示!");
+            //成功
+            toastr.success("成功!");
+            //警告
+            toastr.warning("警告!");
+            //错误
+            com.demo.exceptions("错误!");
+            //模态框关闭
+            $('#myModal').modal('hide');
+        });
+    });
+
+    (function ($) {
+        $.fn.serializeJson = function () {
+            var serializeObj = {};
+            var array = this.serializeArray();
+            var str = this.serialize();
+            $(array).each(function () {
+                if (serializeObj[this.name]) {
+                    if ($.isArray(serializeObj[this.name])) {
+                        serializeObj[this.name].push(this.value);
+                    } else {
+                        serializeObj[this.name] = [serializeObj[this.name], this.value];
+                    }
+                } else {
+                    serializeObj[this.name] = this.value;
+                }
+            });
+            return serializeObj;
+        };
+    })(jQuery);
+    //添加
+    $(function () {
+        $.get("regionServlet?method=getProvinces",
+            function (data) {
+                if (data.code == 0) {
+                    var html = "<option value=''>请选择省份</option>";
+                    for (var i = 0; i < data.data.length; i++) {
+                        html += "<option value='" + data.data[i].province_id + "'>" + data.data[i].province_name + "</option>";
+                    }
+                    $("#province").html(html);
+                }
+            });
+
+        $("#province").change(function () {
+            const pid = $("#province").val();
+            console.log(pid);
+            $.get("regionServlet?method=getCitys&pid=" + pid, function (data) {
+                if (data != null && data.code == 0) {
+                    var html = "<option value=''>请选择城市</option>";
+                    for (var i = 0; i < data.data.length; i++) {
+                        html += "<option value='" + data.data[i].city_id + "'>" + data.data[i].city_name + "</option>";
+                    }
+                    $("#city").html(html);
+                }
+            })
+        });
+        $("#submit").click(function () {
+            var fromData = $("#signupForm").serializeJson();
+            console.log(fromData);
+
+            $.ajax({
+                url: "saleHouseServlet?method=addAndEdit",
+                type: "POST",
+                dataType: 'JSON',
+                data: JSON.stringify(fromData),
+                //设置请求的contentType为"application/json"
+                contentType: "application/json;charset=utf-8",
+                success: function (response) {
+                    //处理返回的响应结果
+                    if (response.code == 0) {
+                        toastr.success("成功!");
+                        $("#closeButton").trigger("click");
+                        $("#searchButton").trigger("click");
+                    }
+                }
+            });
+        });
+    });
+
+    function edit(id) {
+        console.log(id);
+        $("#newForm").trigger("click");
+        $.get("saleHouseServlet?method=getById&sale_id=" + id, function (resp) {
+            var data = resp.data;
+            // debugger;
+            // console.log(data);
+            $("#sale_id").val(data.sale_id);
+            $("#sale_subject").val(data.sale_subject);
+            $("#sale_total_price").val(data.sale_total_price);
+            $("#sale_innerarea").val(data.sale_innerarea);
+            $("#buildName").val(data.build_name);
+
+            $('#add_status').children('option').each(function () {
+                if ($(this).val() == data.sale_status + "") {
+                    $(this).prop('selected', true);
+                }
+            });
+            $('#add_direct').children('option').each(function () {
+                if ($(this).val() == data.sale_direct + "") {
+                    $(this).prop('selected', true);
+                }
+            });
+            $('#add_hall').children('option').each(function () {
+                if ($(this).val() == data.sale_hall + "") {
+                    $(this).prop('selected', true);
+                }
+            });
+            $('#add_room').children('option').each(function () {
+                if ($(this).val() == data.sale_room + "") {
+                    $(this).prop('selected', true);
+                }
+            });
+            $('#add_wei').children('option').each(function () {
+                if ($(this).val() == data.sale_wei + "") {
+                    $(this).prop('selected', true);
+                }
+            });
+        });
+    }
+
+    function del(id) {
+        // console.log(id);
+        $.ajax({
+            url: "saleHouseServlet?method=delete&sale_id=" + id,
+            type: "delete",
+            success: function (response) {
+                //处理返回的响应结果
+                if (response.code == 0) {
+                    toastr.success("删除成功!");
+                    $("#searchButton").trigger("click");
+                }
+            }
+        });
+    }
+
+    function resetAll() {
+        $("#signupForm").find('input[type=text],input[type=radio],select,input[type=hidden]').each(function () {
+            $(this).val('');
+        });
+    }
+
+    function direct(num) {
+        if (num == null || undefined == num || "" == num) {
+            return "东";
+        }
+        if (num == 1) {
+            return "东";
+        } else if (num == 2) {
+            return "南";
+        } else if (num == 3) {
+            return "西";
+        } else {
+            return "北";
+        }
+    }
+
+    var images = [
+        "https://pic.haofang.net/oss/online/tmp/2019/06/12/b0e5aa8a30aa430badc34aacb0bdc67c.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/12/e28492d3e8b248f1be5bc7332b4b27fb.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/12/1811647bb743434fa6e4542ef0d6cf18.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/12/b5fb6d0fd76e497faa125469b5857d79.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/12/64efba213099417bb6d82291dfbc8290.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/02/23/6993cfa012bb49df9476f88889983a58.jpg?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2018/12/12/ab3cd7f02d3f4ced85bfc3ff0a562d39.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/20/099622719433436d924c4cd17333fdcb.png?x-oss-process=image/resize,m_fill,h_160,w_220"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/20/9520cc456daf414bb5e29211381952ad.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/20/7fe0965063f54db2b03f75814c649d9e.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/03/12/3d47f4d78fed40229622f68877de6db6.jpg?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/03/12/deabb80f0eca46eea01d61846395934d.jpg?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/03/12/b856b0fc1195463daf2a6c1e3cdfe600.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/17/1e4faa664c4b48d2986d5aca6911b503.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/05/11/f08722aa5ebe45f8a71fa1b53e73597c.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/17/b3fdff7c691747e88269c6d3abe78476.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/06/17/ae2041e82beb444e8ac484761c64d364.png?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2019/05/11/ed32f9dca2ed48478f2d98214e3b1468.jpg?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2018/12/05/1d311acb23d940ce80a9e9f1290af1c5.jpg?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+        , "https://pic.haofang.net/oss/online/tmp/2018/12/05/a2cd7596f1d841baaa888185e7a62700.jpg?x-oss-process=image/resize,m_fill,h_421,w_712,limit_0"
+    ];
+
+    function image(index) {
+        var n = index % images.length;
+        return images[n];
+    }
+
+
+
+    $(function () {
+        var searchParam = $("#searchForm").serializeJson();
+        searchParam.page_num = g_pageNumber;
+        searchParam.page_size = g_pageSize;
+        var d = JSON.stringify(searchParam);
+        $.ajax({
+            url: "saleHouseServlet?method=getPageResult",
+            type: "POST",
+            dataType: 'JSON',
+            data: d,
+            contentType: "application/json;charset=utf-8",
+            success: function (r) {
+                //处理返回的响应结果
+                if (r.code == 0) {
+                    P.initMathod({
+                        params: {elemId: '#Page',total:r.total},
+                        requestFunction: function () {
+                            var searchParam = $("#searchForm").serializeJson();
+                            searchParam.page_num = P.config.pageIndex;
+                            searchParam.page_size = P.config.pageSize;
+
+                            var d = JSON.stringify(searchParam);
+                            $.ajax({
+                                url: "saleHouseServlet?method=getPageResult",
+                                type: "POST",
+                                dataType: 'JSON',
+                                data: d,
+                                contentType: "application/json;charset=utf-8",
+                                success: function (response) {
+                                    //处理返回的响应结果
+                                    console.log(response);
+                                    if (response.code == 0) {
+                                        var html = '';
+                                        var datas = response.data;
+                                        for (i in datas) {
+                                            var obj = datas[i];
+                                            var temp = '';
+                                            var direction = direct(datas[i].sale_direct);
+                                            var imgSrc = image(i);
+
+                                            temp = '<li class=""><div><div class="divLeft" style="margin-left: 200px"><img width="300px" height="210px" src="' + imgSrc + '"></div><div class="divLeft"><div class="title"><strong class="frontTitle">' + obj.sale_subject + '</strong></div><div class="house-info fontText" >' + obj.build_name + '&nbsp;&nbsp;|&nbsp;&nbsp;' + obj.sale_room + '室' + obj.sale_hall + '厅' + obj.sale_wei + '卫 &nbsp;&nbsp;|&nbsp;&nbsp;' + obj.sale_innerarea + '㎡&nbsp;&nbsp;|&nbsp;&nbsp;朝' + direction + '</div><div class="follow-info fontText"></div><div class="price-info fontText"><div class="total-price" style="color: red;font-size: 22px"><span>' + obj.sale_total_price + '</span>万</div></div></div></div></li>' +
+                                                '<button type="button" onclick="edit(' + obj.sale_id + ');" class="btn btn-info">编辑</button>&nbsp;&nbsp;&nbsp;<button  type="button" onclick="del(' + obj.sale_id + ')" class="btn btn-info">删除</button><div class="clear"/><hr/>';
+                                            html += temp;
+                                        }
+
+                                        $("#contentList").html(html);
+                                        P.config.total=response.total;
+
+                                    }
+                                }
+                            });
+
+                            // console.log("xxxxxxx:"+P.config.total+"  dfad:"+P.config.pageIndex)
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.boot.mapper.RegionMapper">
+
+
+    <select id="selectAllProvince" resultType="com.demo.boot.pojo.Province">
+      select PROVINCE_ID, PROVINCE_NAME
+      from FUN_PROVINCE;
+    </select>
+
+    <select id="getCityByProvinceId" resultType="com.demo.boot.pojo.City">
+        select CITY_ID,CITY_NAME
+        from FUN_CITY
+        where PROVINCE_ID = #{province_id}
+    </select>
+</mapper>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>好房通管理系统</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" href="favicon.ico">
+    <!--插件  -->
+    <link rel="stylesheet" href="css/bootstrap.css">
+
+    <!--插件——动画  -->
+    <link rel="stylesheet" href="css/animate.css">
+
+    <!--插件——字体库  -->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+
+    <!--插件——加载进度条  -->
+    <link rel="stylesheet" href="css/plugins/nprogress/nprogress.css">
+
+    <!--插件——侧边栏导航  -->
+    <link rel="stylesheet" href="css/plugins/metisMenu/metisMenu.css">
+
+    <!--自定义  -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div class="wrapper">
+    <header class="header">
+        <i id="sideClose" class="fa fa-bars fa-lg"></i>
+        <img class="logo" width="30px" height="30px" src="img/logo.png" alt="logo">
+        <span class="logo-title">好房通管理系统</span>
+    </header>
+    <!--左侧导航-->
+    <nav class="navbar-default navbar-static-side">
+        <div class="sidebar-nav">
+            <ul class="metismenu" id="menu">
+                <li class="active">
+                    <a class="has-arrow" href="javascript:;" aria-expanded="false">
+                        <span class="fa fa-fw fa-th-large"></span>
+                        <span class="menu-title">表格控件</span>
+                    </a>
+                    <ul class="collapse" aria-expanded="true">
+                        <li><a href="tableBasic.html">基础表格</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!--右侧文本区-->
+    <div class="wrapper-page">
+
+        <!--tab-->
+        <button id="scrollTabLeft" class="btn btn-default btn-left">
+            <span class="glyphicon glyphicon-backward"></span>
+        </button>
+        <div class="content-tabs">
+            <nav class="page-tabs menuTabs">
+                <div class="page-tabs-content">
+                    <a href="javascript:;" class="menuTab active" data-id="tableBasic.html">基础表格</a>
+                    <i class="fa fa-remove"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <!--iframe主体  -->
+        <div class="content" id="content">
+            <iframe id="iframe" class="iframe" width="100%" height="100%" src="tableBasic.html"
+                    data-id='tableBasic.html' frameborder="0"></iframe>
+        </div>
+    </div>
+</div>
+
+<!--插件-->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<!--插件——侧边栏导航  -->
+<script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+
+<!--插件——加载进度条  -->
+<script src="js/plugins/nprogress/nprogress.js"></script>
+<script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+<!--自定义JS  -->
+<script src="js/tab.js"></script>
+
+<script>
+    $(function () {
+        //调用侧边栏插件
+        $("#menu").metisMenu();
+        $('.sidebar-nav').slimScroll({
+            height: '100%',
+            railOpacity: 0.9,
+            alwaysVisible: false
+        });
+        $(".user").hover(function () {
+            $('.user-info').toggle().addClass('animated fadeIn');
+        });
+        //首页加载
+        NProgress.start();
+        setTimeout(function () {
+            NProgress.done();
+        }, 1000);
+        //左侧导航条收缩
+        $('#sideClose').on('click', function () {
+            if ($('.navbar-default').hasClass('side-close')) {
+                $('.navbar-default').removeClass('side-close');
+            } else {
+                $('.navbar-default').addClass('side-close');
+            }
+            if ($('.wrapper-page').hasClass('page-close')) {
+                $('.wrapper-page').removeClass('page-close');
+            } else {
+                $('.wrapper-page').addClass('page-close');
+            }
+            $('.metismenu li').each(function () {
+                if ($(this).hasClass('active')) {
+                    $(this).children('.has-arrow').removeClass('active1');
+                    $(this).children('.collapse').removeClass('in').attr('aria-expanded', 'false');
+                    if ($(this).children('.collapse').children('li').hasClass('active')) {
+                        $(this).children('.collapse').children('li').removeClass('active');
+                        $(this).children('.collapse').children('li').children('.has-arrow').removeClass('active1');
+                        $(this).children('.collapse').children('li').children('.collapse').removeClass('in').attr('aria-expanded', 'false');
+                    }
+                }
+            });
+        });
+        //侧边栏
+        $(".metismenu li a").on("click", function () {
+            $(".metismenu li a").removeClass('active1');
+            $(this).addClass("active1");
+            return false;
+        });
+
+    });
+</script>
+</body>
+
+</html>

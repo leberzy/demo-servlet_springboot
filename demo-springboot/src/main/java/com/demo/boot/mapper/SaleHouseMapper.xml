@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.boot.mapper.SaleHouseMapper">
+
+
+    <insert id="insertRecord0" parameterType="com.demo.boot.pojo.po.SaleHousePO">
+        insert into FUN_SALE(
+        SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS,
+        SALE_TOTAL_PRICE,SALE_INNERAREA,SALE_DIRECT,SALE_HALL,SALE_WEI)
+        values (#{sale_id,jdbcType=INTEGER},#{sale_subject,jdbcType=VARCHAR},#{build_name,jdbcType=VARCHAR},
+        #{city_id,jdbcType=INTEGER},#{update_time,jdbcType=TIMESTAMP},#{sale_status,jdbcType=VARCHAR},#{sale_total_price,jdbcType=DOUBLE},
+        #{sale_innerarea,jdbcType=DOUBLE},#{sale_direct,jdbcType=INTEGER},#{sale_hall,jdbcType=INTEGER},
+        #{sale_wei,jdbcType=INTEGER});
+    </insert>
+
+    <insert id="insertRecord" parameterType="com.demo.boot.pojo.po.SaleHousePO">
+        insert into FUN_SALE(
+            SALE_ID,COMP_ID,CITY_ID,DEPT_ID,CREATION_TIME,SALE_NO,SALE_USEAGE,
+            SALE_AREA,SALE_TOTAL_PRICE,SALE_SOURCE,SALE_EXPLRTH,SALE_CONSIGN,SALE_MAP,SALE_LEVEL,
+            PLATE_TYPE,SALE_STATUS,SHARE_FLAG,RED_FLAG,FROM_PUBLIC,SALE_ID_OLD,HOUSE_BARGAIN,
+            PANORAMA_MAP,YOUYOU_DEAL,IS_SALE_LEASE,HOUSE_SITUATION,OLD_TRUE_FLAG,
+            SALE_INNERAREA,SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI,SALE_SUBJECT,BUILD_NAME,UPDATE_TIME
+        )
+        values (#{sale_id},#{comp_id},#{city_id},
+        #{dept_id},#{creation_time,jdbcType=TIMESTAMP},#{sale_no},#{sale_useage},
+        #{sale_area},#{sale_total_price},#{sale_source},#{sale_explrth},
+        #{sale_consign},#{sale_map},#{sale_level},
+        #{plate_type},#{sale_status},#{share_flag},#{red_flag},
+        #{from_public},#{sale_id_old},#{house_bargain},#{panorama_map},
+        #{youyou_deal},#{is_sale_lease},#{house_situation},#{old_true_flag},
+        #{sale_innerarea},#{sale_direct},#{sale_room},#{sale_hall},
+        #{sale_wei},#{sale_subject},#{build_name},#{update_time,jdbcType=TIMESTAMP}
+        );
+    </insert>
+
+    <select id="selectById" resultType="com.demo.boot.pojo.SaleHouse">
+      select SALE_ID as sale_id,SALE_SUBJECT as sale_subject,BUILD_NAME as build_name,CITY_ID as build_name,CITY_ID as city_id,
+      UPDATE_TIME as update_time,SALE_STATUS as sale_status,SALE_TOTAL_PRICE as sale_total_price,SALE_INNERAREA as sale_innerarea,
+      SALE_DIRECT as sale_direct,SALE_ROOM as sale_room,SALE_HALL as sale_hall,SALE_WEI as sale_wei
+      from FUN_SALE
+      where SALE_ID=#{sale_id};
+    </select>
+
+
+    <update id="updateById">
+        update FUN_SALE set
+        <if test="sale_subject!=null and sale_subject!=''">
+            sale_subject = #{sale_subject},
+        </if>
+        <if test="build_name!=null and build_name!=''">
+            build_name = #{build_name},
+        </if>
+        <if test="sale_total_price!=null">
+            sale_total_price = #{sale_total_price},
+        </if>
+        <if test="sale_innerarea!=null">
+            sale_innerarea = #{sale_innerarea},
+        </if>
+        <if test="sale_direct!=null">
+            sale_direct = #{sale_direct},
+        </if>
+        <if test="sale_room!=null">
+            sale_room = #{sale_room},
+        </if>
+        <if test="sale_hall!=null">
+            sale_hall = #{sale_hall},
+        </if>
+        <if test="sale_wei!=null">
+            sale_wei = #{sale_wei},
+        </if>
+        <if test="update_time!=null">
+            update_time = #{update_time},
+        </if>
+        <if test="city_id!=null">
+            city_id = #{city_id},
+        </if>
+        <if test="sale_status!=null">
+            sale_status = #{sale_status}
+        </if>
+        where SALE_ID=#{sale_id}
+    </update>
+
+    <update id="delById">
+        update FUN_SALE set sale_status =100 where SALE_ID=#{sale_id}
+    </update>
+
+
+    <select id="selectTotalRecord" resultType="java.lang.Integer">
+        select count(SALE_ID)
+        from FUN_SALE
+        where SALE_STATUS!=100
+        <if test="city_id!=null">
+            and city_id=#{city_id}
+        </if>
+        <if test="max_price!=null">
+            <![CDATA[
+                       and sale_total_price<=#{max_price}
+                    ]]>
+        </if>
+        <if test="min_price!=null">
+            and sale_total_price>=#{min_price}
+        </if>
+        <if test="sale_room!=null">
+            and sale_room=#{sale_room}
+        </if>
+    </select>
+
+    <select id="selectByPage" parameterType="com.demo.boot.pojo.SaleHouseParam"
+            resultType="com.demo.boot.pojo.SaleHouse">
+        select top ${page_size}
+        SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS,SALE_TOTAL_PRICE,SALE_INNERAREA,
+        SALE_DIRECT,SALE_HALL,SALE_ROOM,SALE_WEI
+        from
+        (select row_number() over(order by SALE_ID asc) as rownumber,
+        SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS
+        ,SALE_TOTAL_PRICE,SALE_INNERAREA,
+        SALE_DIRECT,SALE_HALL,SALE_ROOM,SALE_WEI
+        from FUN_SALE
+        where SALE_STATUS!=100
+        <if test="city_id!=null">
+            and city_id=#{city_id}
+        </if>
+        <if test="max_price!=null">
+            <![CDATA[
+                       and sale_total_price<=#{max_price}
+                    ]]>
+        </if>
+        <if test="min_price!=null">
+            and sale_total_price>=#{min_price}
+        </if>
+        <if test="sale_room!=null">
+            and SALE_ROOM=#{sale_room}
+        </if>
+        ) temp
+        where rownumber>#{offset};
+    </select>
+
+    <select id="getMaxSaleId" resultType="java.lang.Integer">
+        select max(SALE_ID) as id from FUN_SALE;
+    </select>
+
+    <select id="selectForExport" resultType="com.demo.boot.pojo.SaleHouse">
+        select SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS,
+        SALE_TOTAL_PRICE,SALE_INNERAREA,SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI
+        from FUN_SALE
+        where SALE_STATUS != 100
+        <if test="city_id!=null">
+            and city_id=#{city_id}
+        </if>
+        <if test="max_price!=null">
+            <![CDATA[
+                       and sale_total_price<=#{max_price}
+                    ]]>
+        </if>
+        <if test="min_price!=null">
+            and sale_total_price>=#{min_price}
+        </if>
+        <if test="sale_room!=null">
+            and sale_room=#{sale_room}
+        </if>
+    </select>
+</mapper>
