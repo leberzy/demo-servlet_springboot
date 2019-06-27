@@ -1,15 +1,11 @@
 package com.demo.jdbc;
 
-import org.apache.commons.dbutils.QueryRunner;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.*;
-import java.util.*;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class JdbcUtil {
 
@@ -100,5 +96,53 @@ public class JdbcUtil {
         close(null, prep, resultSet);
     }
 
+    //----------------------------------查询封装--------------------------------
+    public static <T> T query(Connection conn, String sql, ResultHandler<T> handler, Object... param) throws SQLException {
+        //sql 设值
+        PreparedStatement prep = conn.prepareStatement(sql);
+        setValue(prep, param);
+        // query
+        prep.executeQuery();
+        //resultSet处理
+        ResultSet rs = prep.getResultSet();
+        T result = null;
+        try {
+            result = handler.handle(rs);
+        } catch (IllegalAccessException | InstantiationException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        close(prep, rs);
+        return result;
+    }
+
+
+    public static int update(Connection conn, String sql, Object... param) throws SQLException {
+        //sql 设值
+        PreparedStatement prep = conn.prepareStatement(sql);
+        setValue(prep, param);
+        // exec
+        prep.executeUpdate();
+        int updateCount = prep.getUpdateCount();
+        close(prep, null);
+        return updateCount;
+    }
+
+    private static void setValue(PreparedStatement prep, Object[] param) throws SQLException {
+        ParameterMetaData pmd = prep.getParameterMetaData();
+        int pmdParameterCount = pmd.getParameterCount();
+        int paramCount = param == null ? 0 : param.length;
+        if (pmdParameterCount != paramCount) {
+            throw new SQLException("Wrong number of parameters: expected "
+                    + pmdParameterCount + ", was given " + paramCount);
+        }
+        //do nothing
+        if (Objects.isNull(param) || param.length == 0) {
+            return;
+        }
+        //set value
+        for (int i = 0; i < param.length; i++) {
+            prep.setObject(i + 1, param[i]);
+        }
+    }
 
 }
