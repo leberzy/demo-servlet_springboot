@@ -1,6 +1,6 @@
 package com.demo.service.impl;
 
-import com.demo.dao.RegionDaoImpl;
+import com.demo.dao.impl.RegionDaoImpl;
 import com.demo.exceptions.QuerySqlException;
 import com.demo.jdbc.ConnHolder;
 import com.demo.pojo.City;

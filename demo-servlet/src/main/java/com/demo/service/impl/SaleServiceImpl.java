@@ -13,6 +13,7 @@ import com.demo.service.SaleService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -144,6 +145,9 @@ public class SaleServiceImpl implements SaleService {
                 param.setMin_price(max_price);
             }
             int total = new SaleDaoImpl().selectTotalRecord(param);
+            if (total == 0) {
+                return PageResult.<SaleHouse>getPageResult(Collections.emptyList(), total, param.getPage_size());
+            }
             List<SaleHouse> list = saleDao.selectByPage(param);
             return PageResult.<SaleHouse>getPageResult(list, total, param.getPage_size());
         } catch (SQLException e) {

@@ -3,6 +3,8 @@ package com.demo.dao.impl;
 import com.demo.dao.SaleDao;
 import com.demo.jdbc.ConnHolder;
 import com.demo.jdbc.JdbcUtil;
+import com.demo.jdbc.ListBeanHandler;
+import com.demo.jdbc.SingleBeanHandler;
 import com.demo.pojo.SaleHouse;
 import com.demo.pojo.SaleHousePO;
 import com.demo.pojo.SaleHouseParam;
@@ -23,36 +25,23 @@ public class SaleDaoImpl implements SaleDao {
     public int insertRecord(SaleHousePO house) throws SQLException {
 
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(
-                "insert into FUN_SALE(" +
-                        "SALE_ID,COMP_ID,CITY_ID,DEPT_ID,CREATION_TIME,SALE_NO,SALE_USEAGE," +
-                        "SALE_AREA,SALE_TOTAL_PRICE,SALE_SOURCE,SALE_EXPLRTH,SALE_CONSIGN,SALE_MAP,SALE_LEVEL," +
-                        "PLATE_TYPE,SALE_STATUS,SHARE_FLAG,RED_FLAG,FROM_PUBLIC,SALE_ID_OLD,HOUSE_BARGAIN," +
-                        " PANORAMA_MAP,YOUYOU_DEAL,IS_SALE_LEASE,HOUSE_SITUATION,OLD_TRUE_FLAG," +
-                        " SALE_INNERAREA,SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI,SALE_SUBJECT,BUILD_NAME,UPDATE_TIME)" +
-                        "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
+        String sql = "insert into FUN_SALE(" +
+                "SALE_ID,COMP_ID,CITY_ID,DEPT_ID,CREATION_TIME,SALE_NO,SALE_USEAGE," +
+                "SALE_AREA,SALE_TOTAL_PRICE,SALE_SOURCE,SALE_EXPLRTH,SALE_CONSIGN,SALE_MAP,SALE_LEVEL," +
+                "PLATE_TYPE,SALE_STATUS,SHARE_FLAG,RED_FLAG,FROM_PUBLIC,SALE_ID_OLD,HOUSE_BARGAIN," +
+                " PANORAMA_MAP,YOUYOU_DEAL,IS_SALE_LEASE,HOUSE_SITUATION,OLD_TRUE_FLAG," +
+                " SALE_INNERAREA,SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI,SALE_SUBJECT,BUILD_NAME,UPDATE_TIME)" +
+                "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )";
         //设值
-        setParamValue(house, prep);
-        prep.execute();
-        int largeUpdateCount = prep.getUpdateCount();
-        //关闭资源
-        JdbcUtil.close(prep, null);
-        return largeUpdateCount;
+        Object[] params = getParams(house);
+        return JdbcUtil.update(conn, sql, params);
     }
 
     @SuppressWarnings("all")
     public SaleHouse selectById(int id) throws SQLException {
-        String sql = "select SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS,SALE_TOTAL_PRICE,SALE_INNERAREA,SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI from FUN_SALE where SALE_ID = ?";
+        String sql = "select sale_id,sale_subject,build_name,city_id,update_time,sale_status,sale_total_price,sale_innerarea,sale_direct,sale_room,sale_hall,sale_wei from FUN_SALE where SALE_ID = ?";
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        prep.setInt(1, id);
-        prep.execute();
-        ResultSet resultSet = prep.getResultSet();
-        if (resultSet.next()) {
-            return handlerSingleBean(resultSet);
-        }
-        JdbcUtil.close(prep, resultSet);
-        return null;
+        return JdbcUtil.query(conn, sql, new SingleBeanHandler<>(SaleHouse.class), id);
     }
 
     @SuppressWarnings("all")
@@ -60,17 +49,11 @@ public class SaleDaoImpl implements SaleDao {
 //        String sql = "delete from FUN_SALE WHERE SALE_ID=?";
         String sql = "update FUN_SALE set sale_status =100 where SALE_ID=?";
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        prep.setObject(1, id);
-        prep.execute();
-        int updateCount = prep.getUpdateCount();
-        JdbcUtil.close(prep, null);
-        return updateCount;
+        return JdbcUtil.update(conn, sql, id);
     }
 
     @SuppressWarnings("all")
     public int updateById(SaleHouse house) throws SQLException {
-        //SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS,SALE_TOTAL_PRICE,SALE_INNERAREA,SALE_DIRECT,SALE_HALL,SALE_WEI
         //拼凑Sql语句
         String sql = "update FUN_SALE set ";
         Map<String, Object> map = new LinkedHashMap<>();
@@ -88,23 +71,14 @@ public class SaleDaoImpl implements SaleDao {
         sql += " where SALE_ID=?";
         //连接执行
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        int i = 1;
-        for (Object object : objects) {
-            prep.setObject(i++, object);
-        }
-        prep.execute();
-        //变更记录数
-        int updateCount = prep.getUpdateCount();
-        JdbcUtil.close(prep, null);
-        return updateCount;
+        return JdbcUtil.update(conn, sql, objects.toArray());
     }
 
     @SuppressWarnings("all")
     public List<SaleHouse> selectAllList(SaleHouseParam param) throws SQLException {
 
-        String sql = "select SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS" +
-                "        ,SALE_TOTAL_PRICE,SALE_INNERAREA,SALE_DIRECT,SALE_ROOM,SALE_WEI " +
+        String sql = "select sale_id,sale_subject,build_name,city_id,update_time,sale_status" +
+                "        ,sale_total_price,sale_innerarea,sale_direct,sale_room,sale_wei " +
                 "        from FUN_SALE " +
                 "        where SALE_STATUS != 100" +
                 "        and city_id = ?" +
@@ -112,44 +86,20 @@ public class SaleDaoImpl implements SaleDao {
                 "        and sale_total_price >= ?" +
                 "        and sale_room = ?";
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        prep.setInt(1, param.getCity_id());
-        prep.setDouble(2, param.getMax_price());
-        prep.setDouble(3, param.getMin_price());
-        prep.setInt(4, param.getSale_room());
-        prep.execute();
-        ArrayList<SaleHouse> result = handlerResult(prep.getResultSet());
-        JdbcUtil.close(prep, prep.getResultSet());
-        return result;
+        return JdbcUtil.query(conn,sql, new ListBeanHandler<>(SaleHouse.class),
+                param.getCity_id(),param.getMax_price(),param.getMin_price(),param.getSale_room());
     }
 
     @SuppressWarnings("all")
     public List<SaleHouse> selectByPage(SaleHouseParam param) throws SQLException {
-
-        String sql = "select top " + param.getPage_size() +
-                "  SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS,SALE_TOTAL_PRICE,SALE_INNERAREA," +
-                "  SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI " +
-                " from " +
-                "        (select row_number() over(order by SALE_ID asc) as rownumber," +
-                "        SALE_ID,SALE_SUBJECT,BUILD_NAME,CITY_ID,UPDATE_TIME,SALE_STATUS" +
-                "        ,SALE_TOTAL_PRICE,SALE_INNERAREA," +
-                "        SALE_DIRECT,SALE_ROOM,SALE_HALL,SALE_WEI " +
-                "        from FUN_SALE " +
-                "        where SALE_STATUS!=100" +
-                "        and city_id=?" +
-                "        and sale_total_price<=?" +
-                "        and sale_total_price>=?" +
-                "        and sale_room=?" +
-                "        ) temp " +
-                " where rownumber>?";
+        String sql = "select top "+param.getPage_size()+" sale_id,sale_subject,build_name,city_id,update_time,sale_status,sale_total_price,sale_innerarea,sale_direct,sale_room,sale_hall,sale_wei " +
+                " from (select row_number() over(order by sale_id asc) as rownumber,sale_id,sale_subject,build_name,city_id,update_time,sale_status,sale_total_price,sale_innerarea,sale_direct,sale_room,sale_hall,sale_wei" +
+                " from fun_sale  where  sale_status!=100 and city_id=? and sale_total_price<=? and sale_total_price>=? and sale_room=? ) temp where rownumber > ?;";
 
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        populateParam(param, prep);
-        prep.execute();
-        ArrayList<SaleHouse> result = handlerResult(prep.getResultSet());
-        JdbcUtil.close(prep, prep.getResultSet());
-        return result;
+        return JdbcUtil.query(conn, sql, new ListBeanHandler<>(SaleHouse.class),
+                param.getCity_id(), param.getMax_price(), param.getMin_price()
+                ,param.getSale_room(),param.getOffset());
     }
 
     /**
@@ -162,15 +112,7 @@ public class SaleDaoImpl implements SaleDao {
     public int getMaxId() throws SQLException {
         String sql = "select max(SALE_ID) as id from FUN_SALE;";
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        prep.execute();
-        ResultSet resultSet = prep.getResultSet();
-        int num = 0;
-        if (resultSet.next()) {
-            num = resultSet.getInt(1);
-        }
-        JdbcUtil.close(prep, resultSet);
-        return num;
+        return JdbcUtil.query(conn, sql, new SingleBeanHandler<>(int.class));
     }
 
     @SuppressWarnings("all")
@@ -182,19 +124,9 @@ public class SaleDaoImpl implements SaleDao {
                 " and sale_total_price >= ? " +
                 " and sale_room = ? ";
         Connection conn = ConnHolder.getConnection();
-        PreparedStatement prep = conn.prepareStatement(sql);
-        prep.setInt(1, param.getCity_id());
-        prep.setDouble(2, param.getMax_price());
-        prep.setDouble(3, param.getMin_price());
-        prep.setInt(4, param.getSale_room());
-        prep.execute();
-        ResultSet resultSet = prep.getResultSet();
-        int num = -1;
-        if (resultSet.next()) {
-            num = resultSet.getInt(1);
-        }
-        JdbcUtil.close(prep, resultSet);
-        return num;
+        return JdbcUtil.query(conn, sql, new SingleBeanHandler<>(Integer.class),
+                param.getCity_id(), param.getMax_price(), param.getMin_price(),
+                param.getSale_room());
     }
 
     //私有方法
@@ -239,64 +171,49 @@ public class SaleDaoImpl implements SaleDao {
 
     /**
      * @param house
-     * @param prep
      * @throws SQLException
      */
-    private void setParamValue(SaleHousePO house, PreparedStatement prep) throws SQLException {
+    private Object[] getParams(SaleHousePO house){
         //。。
-        prep.setObject(1, house.getSale_id());
-        prep.setObject(2, house.getComp_id());
-        prep.setObject(3, house.getCity_id());
-        prep.setObject(4, house.getDept_id());
-        prep.setObject(5, new java.sql.Date(house.getCreation_time().getTime()));
-        prep.setObject(6, house.getSale_no());
-        prep.setObject(7, house.getSale_useage());
-        prep.setObject(8, house.getSale_area());
-        prep.setObject(9, house.getSale_total_price());
-        prep.setObject(10, house.getSale_source());
-        prep.setObject(11, house.getSale_explrth());
-        prep.setObject(12, house.getSale_consign());
-        prep.setObject(13, house.getSale_map());
-        prep.setObject(14, house.getSale_level());
-        prep.setObject(15, house.getPlate_type());
-        prep.setObject(16, house.getSale_status());
-        prep.setObject(17, house.getShare_flag());
-        prep.setObject(18, house.getRed_flag());
-        prep.setObject(19, house.getFrom_public());
-        prep.setObject(20, house.getSale_id_old());
-        prep.setObject(21, house.getHouse_bargain());
-        prep.setObject(22, house.getPanorama_map());
-        prep.setObject(23, house.getYouyou_deal());
-        prep.setObject(24, house.getIs_sale_lease());
-        prep.setObject(25, house.getHouse_situation());
-        prep.setObject(26, house.getOld_true_flag());
-        prep.setObject(27, house.getSale_innerarea());
-        prep.setObject(28, house.getSale_direct());
-        prep.setObject(29, house.getSale_room());
-        prep.setObject(30, house.getSale_hall());
-        prep.setObject(31, house.getSale_wei());
-        prep.setObject(32, house.getSale_subject());
-        prep.setObject(33, house.getBuild_name());
-        prep.setObject(34, new java.sql.Date(house.getUpdate_time().getTime()));
+        ArrayList<Object> objects = new ArrayList<>();
+        objects.add(house.getSale_id());
+        objects.add(house.getComp_id());
+        objects.add(house.getCity_id());
+        objects.add(house.getDept_id());
+        objects.add(new java.sql.Date(house.getCreation_time().getTime()));
+        objects.add(house.getSale_no());
+        objects.add(house.getSale_useage());
+        objects.add(house.getSale_area());
+        objects.add(house.getSale_total_price());
+        objects.add(house.getSale_source());
+        objects.add(house.getSale_explrth());
+        objects.add( house.getSale_consign());
+        objects.add(house.getSale_map());
+        objects.add(house.getSale_level());
+        objects.add(house.getPlate_type());
+        objects.add(house.getSale_status());
+        objects.add(house.getShare_flag());
+        objects.add(house.getRed_flag());
+        objects.add(house.getFrom_public());
+        objects.add(house.getSale_id_old());
+        objects.add(house.getHouse_bargain());
+        objects.add(house.getPanorama_map());
+        objects.add(house.getYouyou_deal());
+        objects.add(house.getIs_sale_lease());
+        objects.add(house.getHouse_situation());
+        objects.add(house.getOld_true_flag());
+        objects.add(house.getSale_innerarea());
+        objects.add(house.getSale_direct());
+        objects.add(house.getSale_room());
+        objects.add(house.getSale_hall());
+        objects.add(house.getSale_wei());
+        objects.add(house.getSale_subject());
+        objects.add(house.getBuild_name());
+        objects.add(new java.sql.Date(house.getUpdate_time().getTime()));
+        return objects.toArray();
     }
 
-    /**
-     * 处理结果
-     *
-     * @param resultSet
-     * @return
-     * @throws SQLException
-     */
-    private ArrayList<SaleHouse> handlerResult(ResultSet resultSet) throws SQLException {
-
-        ArrayList<SaleHouse> objects = new ArrayList<>();
-        while (resultSet.next()) {
-            //每行数据
-            SaleHouse saleHouse = handlerSingleBean(resultSet);
-            objects.add(saleHouse);
-        }
-        return objects;
-    }
+    //------------------------------------------------------------------------
 
     /**
      * 映射每行数据
@@ -339,20 +256,4 @@ public class SaleDaoImpl implements SaleDao {
         map.clear();
         return saleHouse;
     }
-
-    /**
-     * 查询赋值
-     *
-     * @param param
-     * @param prep
-     * @throws SQLException
-     */
-    private void populateParam(SaleHouseParam param, PreparedStatement prep) throws SQLException {
-        prep.setObject(1, param.getCity_id());
-        prep.setObject(2, param.getMax_price());
-        prep.setObject(3, param.getMin_price());
-        prep.setObject(4, param.getSale_room());
-        prep.setObject(5, param.getOffset());
-    }
-
 }
